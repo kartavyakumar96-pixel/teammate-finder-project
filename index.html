@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackDay Teammate Finder</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f9; padding: 20px; text-align: center; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #d93f0b; }
+        input { padding: 10px; margin: 10px 0; width: 90%; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #2b3531; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 95%; }
+        button:hover { background: #1a221f; }
+        .profile-card { border-left: 5px solid #d93f0b; text-align: left; margin-top: 15px; padding: 15px; border-radius: 4px; background: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Find Your Squad - HackDay 2026</h1>
+        <p>Post your skills below to find a team.</p>
+        
+        <input type="text" id="nameInput" placeholder="Your Name (e.g., Rahul)">
+        <input type="text" id="skillsInput" placeholder="Your Skills (e.g., Frontend, Firebase, Arduino)">
+        <button id="submitBtn">Post My Profile</button>
+
+        <h2>Available Teammates</h2>
+        <div id="profilesList">
+            <!-- Profiles will load here -->
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKBIWyWfOF04hUSn2p7eaQcCTB2J9IYQk",
+            authDomain: "teammate-finder-2026.firebaseapp.com",
+            projectId: "teammate-finder-2026",
+            storageBucket: "teammate-finder-2026.firebasestorage.app",
+            messagingSenderId: "293953207656",
+            appId: "1:293953207656:web:269ed92e7a4c18802feadd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const nameInput = document.getElementById('nameInput');
+        const skillsInput = document.getElementById('skillsInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const profilesList = document.getElementById('profilesList');
+
+        submitBtn.addEventListener('click', async () => {
+            if (nameInput.value === "" || skillsInput.value === "") {
+                alert("Please fill in both fields!");
+                return;
+            }
+            await addDoc(collection(db, "teammates"), {
+                name: nameInput.value,
+                skills: skillsInput.value,
+                timestamp: new Date()
+            });
+            nameInput.value = "";
+            skillsInput.value = "";
+        });
+
+        onSnapshot(collection(db, "teammates"), (snapshot) => {
+            profilesList.innerHTML = ""; 
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                profilesList.innerHTML += `
+                    <div class="profile-card">
+                        <strong>${data.name}</strong><br>
+                        Skills: ${data.skills}
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
